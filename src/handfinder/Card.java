@@ -99,7 +99,7 @@ public class Card implements Comparable<Card>{
 
     @Override
     public int compareTo(Card other) {
-        return (this.number - other.number) * 1000 + (this.suit - other.suit);
+        return (other.number - this.number ) * 1000 + (other.suit - this.suit);
     }
 
     public int getNumber() {
@@ -116,5 +116,9 @@ public class Card implements Comparable<Card>{
 
     public boolean isRoyal() {
         return this.number > 9;
+    }
+
+    public void print() {
+        System.out.println("  " + this.facevalue + this.suit);
     }
 }

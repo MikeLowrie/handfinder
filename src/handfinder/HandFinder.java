@@ -64,6 +64,8 @@ public class HandFinder {
         this.checkTwoPair(cards);
         this.checkPair(cards);
         this.checkHighCard(cards);
+
+        this.print();
     }
 
     /**
@@ -147,36 +149,53 @@ public class HandFinder {
     }
 
     /**
-     *
-     * @param cards
+     * Finds all pairs in the current list of cards.
+     * @param cards Available cards to search
      */
     public void checkPair(ArrayList<Card> cards) {
         Hand h = new Hand(new ArrayList<Card>(), "Pair");
         Card current = new Card();
         Card previous = new Card();
         boolean reassignprevious = true;
-        for(int i = 0; i <= cards.size(); i++) {
+        for(int i = 0; i < cards.size(); i++) {
             if(reassignprevious)
                 previous = current;
             reassignprevious = true;
             current = cards.get(i);
 
-            if(current.getNumber() == previous.getNumber()) {
+            if(current.getNumber() == previous.getNumber() && current.getSuit() != previous.getSuit()) {
                 h.addCard(current);
                 h.addCard(previous);
                 reassignprevious = false;
+                totalhands.add(h);
+
+                cards.remove(current);
+                cards.remove(previous);
+                i -= 2;
+
+                previous = new Card();
+                h = new Hand(new ArrayList<Card>(), "Pair");
             }
         }
     }
 
     public void checkHighCard(ArrayList<Card> cards) {
+        if(cards.size() == 0)
+            return;
 
+        Hand h = new Hand(new ArrayList<Card>(), "High Card");
+        h.addCard(cards.remove(0));
+        totalhands.add(h);
+        checkHighCard(cards);
     }
 
     public void print() {
-        for(Card c : masterlist) {
+        for(Card c : masterlist)
             System.out.println(c.getFacevalue() + c.getSuit());
-        }
+
+        for(Hand h : totalhands)
+            h.print();
+
     }
 
     public ArrayList<Card> cloneMasterList() {

@@ -29,6 +29,8 @@ public class Hand {
     }
 
     public void print() {
-
+        System.out.println(this.handname);
+        for(Card c : hand)
+            c.print();
     }
 }
