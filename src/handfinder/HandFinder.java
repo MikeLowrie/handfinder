@@ -54,6 +54,7 @@ public class HandFinder {
     public void findBestHands() {
         ArrayList<Card> cards = this.cloneMasterList();
 
+        // Order is set based on value of hand, except as noted below.
         this.checkRoyalFlush(cards);
         this.checkStraightFlush(cards);
         this.checkFourOfAKind(cards);
@@ -61,8 +62,9 @@ public class HandFinder {
         this.checkFlush(cards);
         this.checkStraight(cards);
         this.checkThreeOfAKind(cards);
-        this.checkTwoPair(cards);
+        // Pair is checked before Two Pair as it's easier afterward to just group pairs that are found.
         this.checkPair(cards);
+        this.checkTwoPair();
         this.checkHighCard(cards);
 
         this.print();
@@ -144,8 +146,34 @@ public class HandFinder {
 
     }
 
-    public void checkTwoPair(ArrayList<Card> cards) {
+    /**
+     * Finds all pairs that were earlier found, then groups them into hands that are Two Pair.
+     */
+    public void checkTwoPair() {
+        Hand first = new Hand();
+        Hand second;
 
+        for(int i = 0; i < totalhands.size(); i++) {
+            second = totalhands.get(i);
+            if(second.isPair()) {
+                if (first == null) {
+                    first = totalhands.get(i);
+                } else {
+                    Hand twopair = new Hand(new ArrayList<Card>(), "Two Pair");
+                    twopair.addCard(first.get(0));
+                    twopair.addCard(first.get(1));
+                    twopair.addCard(second.get(0));
+                    twopair.addCard(second.get(1));
+
+                    totalhands.add(twopair);
+                    totalhands.remove(first);
+                    totalhands.remove(second);
+                    i -= 2;
+
+                    first = new Hand();
+                }
+            }
+        }
     }
 
     /**
