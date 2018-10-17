@@ -143,7 +143,50 @@ public class HandFinder {
     }
 
     public void checkThreeOfAKind(ArrayList<Card> cards) {
-
+		Hand h = new Hand(new ArrayList<Card>(), "Three of a Kind");
+		Card current = new Card();
+		Card first = new Card();
+		Card second = new Card();
+		for(int i = 0; i < cards.size() && cards.size() > 3; i++) {
+			current = cards.get(i);
+			if(h.size() == 0) {
+				h.addCard(current);
+			} else if(h.size == 1) {
+				first = h.get(0);
+				// If there is a mismatch in the number, start over with the new card.
+				if(current.getNumber() == first.getNumber()) {
+					if(current.getSuit() != first.getSuit()) {
+						// The two cards are the same number, but different suits. Add this card to the hand.
+						h.addCard(current);
+					}
+				} else {
+					// There is a new number, reset the hand and start over.
+					h = new Hand(new ArrayList<Card>(), "Three of a Kind");
+					h.addCard(current);
+				}
+			} else if(h.size == 2) {
+				first = h.get(0);
+				second = g.get(1);
+				// If there is a mismatch in the number, start over with the new card.
+				if(current.getNumber() == second.getNumber()) {
+					if(current.getSuit() != first.getSuit() && current.getSuit != second.getSuit()) {
+						// There is a uniqueness to all three cards' suits, the three of a kind is complete!
+						h.addCard(current);
+						totalhands.add(h);
+						cards.remove(first);
+						cards.remove(second);
+						cards.remove(current);
+						
+						// Start over from the beginning
+						i = -1;
+					}
+				} else {
+					// There is a mismatch in the number on the sorted cards. No more three of a kinds are possible.
+					h = new Hand(new ArrayList<Card>(), "Three of a Kind");
+					h.addCard(current);
+				}
+			}
+		}
     }
 
     /**
