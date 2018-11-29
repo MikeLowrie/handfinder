@@ -85,7 +85,7 @@ public class HandFinder {
         Hand h = new Hand(new ArrayList<Card>(), "Royal Flush");
 
         // Check for a royal flush. If a card has a "following" number and a matching suit, add it.
-        while(i < cards.size() || h.size() == 5) {
+        while(i < cards.size() || h.size() < 5) {
             moveindex = true;
             Card c = cards.get(i);
             if(c.isRoyal()) {
@@ -117,6 +117,8 @@ public class HandFinder {
                 cards.remove(h.get(k));
             }
             totalhands.add(h);
+			
+			// Look for more if there are enough cards to check
             if(cards.size() >= 5)
                 checkRoyalFlush(cards);
         }
@@ -138,8 +140,45 @@ public class HandFinder {
 
     }
 
+	/**
+	 * Finds all straights in the available list of cards.
+	 * @param cards Available cards to search
+	 */
     public void checkStraight(ArrayList<Card> cards) {
-
+		// Assign locals
+		int i = 0;
+		Hand h = new Hand(new ArrayList<Card>(), "Straight");
+		Card last;
+		
+		// Check for a straight. If a card has a "following" card, add it to the hand.
+		while(i < cards.size() || h.size() == 5) {
+			Card c = cards.get(i);
+			if(h.size() == 0) {
+				h.addCard(c);
+			} else {
+				last = h.get(h.size() - 1);
+				if(last.getNumber() - 1 == c.getNumber()) {
+					// This card is next in sequence, add this card
+					h.addCard(c);
+				} else if(last.getNumber() - 1 > c.getNumber()) {
+					// There is a gap in the cards (ex. going from Queen to Nine can't cover a straight). Reset the hand.
+					h.clear();
+					h.addCard(c);
+				}
+			} 
+		}
+		
+		// Add hand to total hands list
+        if(h.size() == 5) {
+            for(int k = 0; k < 5; k++) {
+                cards.remove(h.get(k));
+            }
+            totalhands.add(h);
+			
+			// Look for more if there are enough cards to check
+            if(cards.size() >= 5)
+                checkStraight(cards);
+        }
     }
 
     public void checkThreeOfAKind(ArrayList<Card> cards) {
