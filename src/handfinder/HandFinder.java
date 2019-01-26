@@ -177,8 +177,126 @@ public class HandFinder {
         }
     }
 
+    /**
+     * Finds all full houses in the available list of cards.
+     * @param cards Available cards to search
+     */
     public void checkFullHouse(ArrayList<Card> cards) {
+        Hand h = new Hand(new ArrayList<Card>(), "Full House");
+        for(int i = 0; i < cards.size(); i++) {
+            Card c = cards.get(i);
+            h.addCard(c);
 
+            // Look for a possible pair or three of a kind, or if not at least a pair
+            for(int j = i + 1; j < cards.size() && h.size() < 3; j++) {
+                Card check = cards.get(j);
+
+                boolean pass = true;
+                for(Card card : h.getHand())
+                    if(card.getSuit() == check.getSuit() || card.getNumber() != check.getNumber())
+                        pass = false;
+
+                if(pass)
+                    h.addCard(check);
+
+            }
+
+            if(h.size() == 3) {
+                // If a three-of-a-kind was found, look for a pair
+                for(int j = i + 1; j < cards.size() - 1 && h.size() < 5; j++) {
+                    Card check = cards.get(j);
+
+                    // Make sure the card isn't already in the hand first
+                    boolean uniquecard = true;
+                    for(Card card : h.getHand())
+                        if(card == check)
+                            uniquecard = false;
+
+                    if(uniquecard) {
+                        Card next = cards.get(j + 1);
+                        if(next.getNumber() == check.getNumber() && next.getSuit() != check.getSuit()) {
+                            // Found a pair! Add these cards and the code will automatically pop out of the for loop
+                            h.addCard(check);
+                            h.addCard(next);
+                        }
+                    }
+                }
+            } else if(h.size() == 2) {
+                // If a pair was found, look for a three-of-a-kind
+                for(int j = i + 1; j < cards.size() - 2 && h.size() < 5; j++) {
+                    Card check = cards.get(j);
+
+                    // Make sure the card isn't already in the hand first
+                    boolean uniquecard = true;
+                    for(Card card : h.getHand())
+                        if(card == check)
+                            uniquecard = false;
+
+                    if(uniquecard) {
+                        int index = j + 1;
+                        Card first = cards.get(index);
+                        while(check.getNumber() == first.getNumber() && index < cards.size() - 2) {
+                            if(check.getSuit() != first.getSuit()) {
+                                // The two cards COULD combine for a three-of-a-kind!
+                                Card second = cards.get(++index);
+                                while(first.getNumber() == second.getNumber() && index < cards.size() - 1) {
+                                    if(first.getSuit() != second.getSuit()) {
+                                        // Found a three-of-a-kind!
+                                        h.addCard(check);
+                                        h.addCard(first);
+                                        h.addCard(second);
+                                    } else {
+                                        // Same suit, just look at the next card
+                                        second = cards.get(++index);
+                                    }
+                                }
+                            } else {
+                                // Same suit, just look at the next card
+                                first = cards.get(++index);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if(h.size() == 5) {
+                for(int k = 0; k < 5; k++) {
+                    cards.remove(h.get(k));
+                }
+                totalhands.add(h);
+
+                // Look for more if there are enough cards to check
+                if(cards.size() >= 5)
+                    checkFlush(cards);
+            }
+            h.clear();
+        }
+        /**
+         * Start at first card
+         *   Can I make a three of a kind with this card?
+         *     YES
+         *       Gather these cards, find next card in sequence that is unique
+         *       Can I make a pair with this card?
+         *         YES
+         *           Gather those cards
+         *           Combine for hand
+         *           RECURSIVE CALL
+         *         NO
+         *           Move forward on next card to find another possible pair
+         *     NO
+         *       Can I make a pair with this card?
+         *         YES
+         *           Gather these cards, find next card in sequence that is unique
+         *           Can I make a three of a kind with this card?
+         *             YES
+         *               Gather those cards
+         *               Combine for hand
+         *               RECURSIVE CALL
+         *             NO
+         *               Move forward on next card to find another possible three-of-a-kind
+         *         NO
+         *           Move forward on starting card
+         */
     }
 
     /**

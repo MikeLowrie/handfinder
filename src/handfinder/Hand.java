@@ -42,6 +42,10 @@ public class Hand {
         return hand.get(index);
     }
 
+    public ArrayList<Card> getHand() {
+        return hand;
+    }
+
     public boolean isPair() {
         return this.handname.equals("Pair");
     }
