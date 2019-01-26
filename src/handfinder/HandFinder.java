@@ -1,5 +1,6 @@
 package handfinder;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -55,6 +56,8 @@ public class HandFinder {
         ArrayList<Card> cards = this.cloneMasterList();
 
         // Order is set based on value of hand, except as noted below.
+        this.checkFullDeck(cards);
+        this.checkAllCardsOneSuit(cards);
         this.checkRoyalFlush(cards);
         this.checkStraightFlush(cards);
         this.checkFourOfAKind(cards);
@@ -68,6 +71,14 @@ public class HandFinder {
         this.checkHighCard(cards);
 
         this.print();
+    }
+
+    public void checkFullDeck(ArrayList<Card> cards) {
+
+    }
+
+    public void checkAllCardsOneSuit(ArrayList<Card> cards) {
+
     }
 
     /**
@@ -128,16 +139,81 @@ public class HandFinder {
 
     }
 
+    /**
+     * Finds all four-of-a-kind hands in the available list of cards.
+     * @param cards Available cards to search
+     */
     public void checkFourOfAKind(ArrayList<Card> cards) {
+        int i = 0;
+        Hand h = new Hand(new ArrayList<Card>(), "Four of a Kind");
+        Card last;
 
+        while(i < cards.size() || h.size() == 5) {
+            Card c = cards.get(i);
+            if(h.size() == 0) {
+                h.addCard(c);
+            } else {
+                last = h.get(h.size() - 1);
+                if(last.getSuit() != c.getSuit() && last.getNumber() == c.getNumber()) {
+                    // This card matches suit, add this card
+                    h.addCard(c);
+                } else if(last.getNumber() > c.getNumber()) {
+                    // There is a gap in the cards. Reset the hand.
+                    h.clear();
+                    h.addCard(c);
+                }
+            }
+
+            if(h.size() == 5) {
+                for(int k = 0; k < 5; k++) {
+                    cards.remove(h.get(k));
+                }
+                totalhands.add(h);
+
+                // Look for more if there are enough cards to check
+                if(cards.size() >= 5)
+                    checkFourOfAKind(cards);
+            }
+        }
     }
 
     public void checkFullHouse(ArrayList<Card> cards) {
 
     }
 
+    /**
+     * Finds all flushes in the available list of cards.
+     * @param cards Available cards to search
+     */
     public void checkFlush(ArrayList<Card> cards) {
+        int i = 0;
+        Hand h = new Hand(new ArrayList<Card>(), "Flush");
+        Card last;
 
+        while(i < cards.size() || h.size() == 5) {
+            Card c = cards.get(i);
+            if(h.size() == 0) {
+                h.addCard(c);
+            } else {
+                last = h.get(h.size() - 1);
+                if(last.getSuit() == c.getSuit() && last.getNumber() != c.getNumber()) {
+                    // This card matches suit, add this card
+                    h.addCard(c);
+                }
+                // Don't remove all cards from this hand until every card is counted
+            }
+
+            if(h.size() == 5) {
+                for(int k = 0; k < 5; k++) {
+                    cards.remove(h.get(k));
+                }
+                totalhands.add(h);
+
+                // Look for more if there are enough cards to check
+                if(cards.size() >= 5)
+                    checkFlush(cards);
+            }
+        }
     }
 
 	/**
@@ -181,6 +257,10 @@ public class HandFinder {
         }
     }
 
+    /**
+     * Finds all three-of-a-kind hands in the current list of cards.
+     * @param cards Available cards to search
+     */
     public void checkThreeOfAKind(ArrayList<Card> cards) {
 		Hand h = new Hand(new ArrayList<Card>(), "Three of a Kind");
 		Card current = new Card();
@@ -190,7 +270,7 @@ public class HandFinder {
 			current = cards.get(i);
 			if(h.size() == 0) {
 				h.addCard(current);
-			} else if(h.size == 1) {
+			} else if(h.size() == 1) {
 				first = h.get(0);
 				// If there is a mismatch in the number, start over with the new card.
 				if(current.getNumber() == first.getNumber()) {
@@ -203,12 +283,12 @@ public class HandFinder {
 					h = new Hand(new ArrayList<Card>(), "Three of a Kind");
 					h.addCard(current);
 				}
-			} else if(h.size == 2) {
+			} else if(h.size() == 2) {
 				first = h.get(0);
-				second = g.get(1);
+				second = h.get(1);
 				// If there is a mismatch in the number, start over with the new card.
 				if(current.getNumber() == second.getNumber()) {
-					if(current.getSuit() != first.getSuit() && current.getSuit != second.getSuit()) {
+					if(current.getSuit() != first.getSuit() && current.getSuit() != second.getSuit()) {
 						// There is a uniqueness to all three cards' suits, the three of a kind is complete!
 						h.addCard(current);
 						totalhands.add(h);
