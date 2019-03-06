@@ -61,7 +61,7 @@ public class HandFinder {
         this.checkRoyalFlush(cards);
         this.checkStraightFlush(cards);
         this.checkFourOfAKind(cards);
-        this.checkFullHouse(cards);
+        this.checkFullHouse(cards); // Output does not work
         this.checkFlush(cards);
         this.checkStraight(cards);
         this.checkThreeOfAKind(cards);
@@ -96,7 +96,7 @@ public class HandFinder {
         Hand h = new Hand(new ArrayList<Card>(), "Royal Flush");
 
         // Check for a royal flush. If a card has a "following" number and a matching suit, add it.
-        while(i < cards.size() || h.size() < 5) {
+        while(i < cards.size() && h.size() < 5) {
             moveindex = true;
             Card c = cards.get(i);
             if(c.isRoyal()) {
@@ -135,8 +135,44 @@ public class HandFinder {
         }
     }
 
+    /**
+     * Finds all straight flushes in the available list of cards.
+     * @param cards Available cards to search
+     */
     public void checkStraightFlush(ArrayList<Card> cards) {
+        int i = 0;
+        Hand h = new Hand(new ArrayList<Card>(), "Straight Flush");
+        Card last;
 
+        while(i < cards.size()) {
+            Card c = cards.get(i);
+            if(h.size() == 0) {
+                h.addCard(c);
+            } else {
+                last = h.get(h.size() - 1);
+                if(last.getNumber() - 1 == c.getNumber() && last.getSuit() == c.getSuit()) {
+                    // This card is next in sequence, add this card
+                    h.addCard(c);
+                } else if(last.getNumber() - 1 > c.getNumber()) {
+                    // There is a gap in the cards (ex. going from Queen to Nine can't cover a straight). Reset the hand.
+                    h.clear();
+                    h.addCard(c);
+                } // No need to clear if the numbers are the same, just keep looking on to the next
+            }
+
+            if(h.size() == 5) {
+                for(int k = 0; k < 5; k++) {
+                    cards.remove(h.get(k));
+                }
+                totalhands.add(h);
+
+                // Look for more if there are enough cards to check
+                if(cards.size() >= 5)
+                    checkStraightFlush(cards);
+                return;
+            }
+            i++;
+        }
     }
 
     /**
@@ -174,6 +210,7 @@ public class HandFinder {
                 if(cards.size() >= 5)
                     checkFourOfAKind(cards);
             }
+            i++;
         }
     }
 
@@ -193,8 +230,9 @@ public class HandFinder {
 
                 boolean pass = true;
                 for(Card card : h.getHand())
-                    if(card.getSuit() == check.getSuit() || card.getNumber() != check.getNumber())
-                        pass = false;
+                    if(card != check)
+                        if(card.getSuit() == check.getSuit() || card.getNumber() != check.getNumber())
+                            pass = false;
 
                 if(pass)
                     h.addCard(check);
@@ -235,19 +273,26 @@ public class HandFinder {
                     if(uniquecard) {
                         int index = j + 1;
                         Card first = cards.get(index);
-                        while(check.getNumber() == first.getNumber() && index < cards.size() - 2) {
+                        boolean continueloop = true;
+                        while(check.getNumber() == first.getNumber() && index < cards.size() - 2 && continueloop) {
+                            index++;
                             if(check.getSuit() != first.getSuit()) {
                                 // The two cards COULD combine for a three-of-a-kind!
-                                Card second = cards.get(++index);
+                                //Card second = cards.get(++index);
+                                Card second = cards.get(index);
                                 while(first.getNumber() == second.getNumber() && index < cards.size() - 1) {
                                     if(first.getSuit() != second.getSuit()) {
                                         // Found a three-of-a-kind!
                                         h.addCard(check);
                                         h.addCard(first);
                                         h.addCard(second);
+                                        continueloop = false;
+                                        break;
                                     } else {
                                         // Same suit, just look at the next card
-                                        second = cards.get(++index);
+                                        //second = cards.get(++index);
+                                        index++;
+                                        second = cards.get(index);
                                     }
                                 }
                             } else {
@@ -267,36 +312,12 @@ public class HandFinder {
 
                 // Look for more if there are enough cards to check
                 if(cards.size() >= 5)
-                    checkFlush(cards);
+                    checkFullHouse(cards);
+
+                return;
             }
             h.clear();
         }
-        /**
-         * Start at first card
-         *   Can I make a three of a kind with this card?
-         *     YES
-         *       Gather these cards, find next card in sequence that is unique
-         *       Can I make a pair with this card?
-         *         YES
-         *           Gather those cards
-         *           Combine for hand
-         *           RECURSIVE CALL
-         *         NO
-         *           Move forward on next card to find another possible pair
-         *     NO
-         *       Can I make a pair with this card?
-         *         YES
-         *           Gather these cards, find next card in sequence that is unique
-         *           Can I make a three of a kind with this card?
-         *             YES
-         *               Gather those cards
-         *               Combine for hand
-         *               RECURSIVE CALL
-         *             NO
-         *               Move forward on next card to find another possible three-of-a-kind
-         *         NO
-         *           Move forward on starting card
-         */
     }
 
     /**
@@ -331,6 +352,7 @@ public class HandFinder {
                 if(cards.size() >= 5)
                     checkFlush(cards);
             }
+            i++;
         }
     }
 
@@ -345,7 +367,7 @@ public class HandFinder {
 		Card last;
 		
 		// Check for a straight. If a card has a "following" card, add it to the hand.
-		while(i < cards.size() || h.size() == 5) {
+		while(i < cards.size() && h.size() < 5) {
 			Card c = cards.get(i);
 			if(h.size() == 0) {
 				h.addCard(c);
@@ -359,7 +381,8 @@ public class HandFinder {
 					h.clear();
 					h.addCard(c);
 				}
-			} 
+			}
+			i++;
 		}
 		
 		// Add hand to total hands list
@@ -436,7 +459,7 @@ public class HandFinder {
         for(int i = 0; i < totalhands.size(); i++) {
             second = totalhands.get(i);
             if(second.isPair()) {
-                if (first == null) {
+                if (first.size() == 0) {
                     first = totalhands.get(i);
                 } else {
                     Hand twopair = new Hand(new ArrayList<Card>(), "Two Pair");
