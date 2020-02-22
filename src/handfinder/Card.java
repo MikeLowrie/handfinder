@@ -10,6 +10,11 @@ public class Card implements Comparable<Card>{
     private String facevalue;
     private static final String AVAILABLESUITS = "CcDdHhSs";
 
+    public static final int ACE_VALUE = 14;
+    public static final int KING_VALUE = 13;
+    public static final int QUEEN_VALUE = 12;
+    public static final int JACK_VALUE = 11;
+
     /**
      * Default constructor.
      */
@@ -100,6 +105,10 @@ public class Card implements Comparable<Card>{
     @Override
     public int compareTo(Card other) {
         return (other.number - this.number ) * 1000 + (other.suit - this.suit);
+    }
+
+    public boolean equals(Card other) {
+        return this.number == other.number && this.suit == other.suit;
     }
 
     public int getNumber() {
