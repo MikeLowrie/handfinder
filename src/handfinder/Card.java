@@ -96,7 +96,7 @@ public class Card implements Comparable<Card>{
             value = 11;
         } else {
             System.err.println(facevalue + " is not valid input for a face value.");
-            System.exit(-12);
+            System.exit(-22);
         }
 
         return value;

@@ -13,6 +13,9 @@ import java.util.Collections;
 public class HandFinder {
     private ArrayList<Card> masterlist;
     private ArrayList<Hand> totalhands;
+    private boolean isdebugmode;
+    private int debugpoints;
+    private String debugname;
 
     private static final int SINGLE_CARD = 10;
     private static final int PAIR = 25;
@@ -34,15 +37,23 @@ public class HandFinder {
      */
     public static void main(String[] args) {
         System.out.println("Welcome to Deck Checker!");
-        new HandFinder(args);
+        if(args[0].equals("debug")) {
+           new UnitTestDriver();
+        } else {
+            new HandFinder(args, false, 0);
+        }
     }
 
     /**
      * Constructor that drives main program.
      * @param args Commandline arguments
+     * @param isdebugmode Boolean to assist with debugging unit tests
+     * @param debugpoints Integer to help apply unit tests
      */
-    public HandFinder(String[] args) {
-        totalhands = new ArrayList<Hand>();
+    public HandFinder(String[] args, boolean isdebugmode, int debugpoints) {
+        totalhands = new ArrayList<>();
+        this.isdebugmode = isdebugmode;
+        this.debugpoints = debugpoints;
         boolean isdeckbuilt = buildList(args);
         if(!isdeckbuilt) {
             System.err.println("Failure occurred during deck build.");
@@ -63,7 +74,12 @@ public class HandFinder {
         masterlist = new ArrayList<Card>();
         boolean addworked = true;
         String nextcard = "";
-        for(int i = 0; i < args.length && addworked; i++) {
+        int start = 0;
+        if(isdebugmode) {
+            this.debugname = args[0];
+            start++;
+        }
+        for(int i = start; i < args.length && addworked; i++) {
             // Input will be 'facevalue''suit', like QC (queen of clubs) or 4S (4 of spades)
             nextcard = args[i];
             addworked = masterlist.add(Card.makeNewCard(nextcard));
@@ -74,7 +90,7 @@ public class HandFinder {
     /**
      * Method that steps through all types of poker hands and checks the list of available cards for hands.
      */
-    public void findBestHands() {
+    private void findBestHands() {
         ArrayList<Card> cards = this.cloneMasterList();
 
         // Order is set based on value of hand, except as noted below.
@@ -99,7 +115,7 @@ public class HandFinder {
      * Checks the total list of cards for a complete deck of cards.
      * @param cards Available cards to search
      */
-    public void checkFullDeck(ArrayList<Card> cards) {
+    private void checkFullDeck(ArrayList<Card> cards) {
         int i = 0;
         Hand h = new Hand(new ArrayList<Card>(), "Full Deck", FULL_DECK);
         while(i < cards.size() && h.size() < 52 && cards.size() > 52) {
@@ -156,7 +172,7 @@ public class HandFinder {
      * Checks the total list of cards for a royal flush. If one is found, method is called again to find additional hands.
      * @param cards Total list of all cards currently not assigned to a hand.
      */
-    public void checkRoyalFlush(ArrayList<Card> cards) {
+    private void checkRoyalFlush(ArrayList<Card> cards) {
         // @TODO: Maybe use a switch statement or something? This algorithm doesn't look like it'd work.
 
         // Assign locals
@@ -210,7 +226,7 @@ public class HandFinder {
      * Finds all straight flushes in the available list of cards.
      * @param cards Available cards to search
      */
-    public void checkStraightFlush(ArrayList<Card> cards) {
+    private void checkStraightFlush(ArrayList<Card> cards) {
         int i = 0;
         Hand h = new Hand(new ArrayList<Card>(), "Straight Flush", STRAIGHT_FLUSH);
         Card last;
@@ -250,7 +266,7 @@ public class HandFinder {
      * Finds all four-of-a-kind hands in the available list of cards.
      * @param cards Available cards to search
      */
-    public void checkFourOfAKind(ArrayList<Card> cards) {
+    private void checkFourOfAKind(ArrayList<Card> cards) {
         int i = 0;
         Hand h = new Hand(new ArrayList<Card>(), "Four of a Kind", FOUR_OF_A_KIND);
         Card last;
@@ -289,7 +305,7 @@ public class HandFinder {
      * Finds all full houses in the available list of cards.
      * @param cards Available cards to search
      */
-    public void checkFullHouse(ArrayList<Card> cards) {
+    private void checkFullHouse(ArrayList<Card> cards) {
         Hand h = new Hand(new ArrayList<Card>(), "Full House", FULL_HOUSE);
         for(int i = 0; i < cards.size(); i++) {
             Card c = cards.get(i);
@@ -395,7 +411,7 @@ public class HandFinder {
      * Finds all flushes in the available list of cards.
      * @param cards Available cards to search
      */
-    public void checkFlush(ArrayList<Card> cards) {
+    private void checkFlush(ArrayList<Card> cards) {
         int i = 0;
         Hand h = new Hand(new ArrayList<Card>(), "Flush", FLUSH);
         Card last;
@@ -431,7 +447,7 @@ public class HandFinder {
 	 * Finds all straights in the available list of cards.
 	 * @param cards Available cards to search
 	 */
-    public void checkStraight(ArrayList<Card> cards) {
+    private void checkStraight(ArrayList<Card> cards) {
 		// Assign locals
 		int i = 0;
 		Hand h = new Hand(new ArrayList<Card>(), "Straight", STRAIGHT);
@@ -473,7 +489,7 @@ public class HandFinder {
      * Finds all three-of-a-kind hands in the current list of cards.
      * @param cards Available cards to search
      */
-    public void checkThreeOfAKind(ArrayList<Card> cards) {
+    private void checkThreeOfAKind(ArrayList<Card> cards) {
 		Hand h = new Hand(new ArrayList<Card>(), "Three of a Kind", THREE_OF_A_KIND);
 		Card current = new Card();
 		Card first = new Card();
@@ -523,7 +539,7 @@ public class HandFinder {
     /**
      * Finds all pairs that were earlier found, then groups them into hands that are Two Pair.
      */
-    public void checkTwoPair() {
+    private void checkTwoPair() {
         Hand first = new Hand();
         Hand second;
 
@@ -554,7 +570,7 @@ public class HandFinder {
      * Finds all pairs in the current list of cards.
      * @param cards Available cards to search
      */
-    public void checkPair(ArrayList<Card> cards) {
+    private void checkPair(ArrayList<Card> cards) {
         Hand h = new Hand(new ArrayList<Card>(), "Pair", PAIR);
         Card current = new Card();
         Card previous = new Card();
@@ -585,7 +601,7 @@ public class HandFinder {
      * Checks for a "high card" hand, when no other hands can be found.
      * @param cards Remaining cards to be checked
      */
-    public void checkHighCard(ArrayList<Card> cards) {
+    private void checkHighCard(ArrayList<Card> cards) {
         if(cards.size() == 0)
             return;
 
@@ -595,16 +611,28 @@ public class HandFinder {
         checkHighCard(cards);
     }
 
-    public void print() {
-        for(Card c : masterlist)
-            System.out.println(c.getFacevalue() + c.getSuit());
-
+    private int getTotalPoints() {
         int totalpoints = 0;
-        for(Hand h : totalhands) {
-            h.print();
+        for (Hand h : totalhands) {
+            if(!isdebugmode)
+                h.print();
             totalpoints += h.getPoints();
         }
-        System.out.println("Total points: " + totalpoints);
+        return totalpoints;
+    }
+
+    public void print() {
+        int totalpoints = this.getTotalPoints();
+
+        if(isdebugmode) {
+            boolean testpass = totalpoints == debugpoints;
+            System.out.println(testpass + " | " + this.debugname + " expects " + this.debugpoints + ", counted " + totalpoints);
+        } else {
+            for (Card c : masterlist)
+                System.out.println(c.getFacevalue() + c.getSuit());
+
+            System.out.println("Total points: " + totalpoints);
+        }
     }
 
     public ArrayList<Card> cloneMasterList() {
