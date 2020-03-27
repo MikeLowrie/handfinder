@@ -40,7 +40,7 @@ public class HandFinder {
         if(args[0].equals("debug")) {
            new UnitTestDriver();
         } else {
-            new HandFinder(args, false, 0);
+           new HandFinder(args, false, 0);
         }
     }
 
@@ -96,9 +96,9 @@ public class HandFinder {
         // Order is set based on value of hand, except as noted below.
         this.checkFullDeck(cards);
         //this.checkEveryCardFlush(cards);
-        //this.checkRoyalFlush(cards);
-        //this.checkStraightFlush(cards);
-        this.checkFourOfAKind(cards); // Not catching 4 of a Kind correctly
+        this.checkRoyalFlush(cards);
+        this.checkStraightFlush(cards);
+        this.checkFourOfAKind(cards);
         this.checkFullHouse(cards);
         this.checkFlush(cards);
         this.checkStraight(cards);
@@ -173,8 +173,6 @@ public class HandFinder {
      * @param cards Total list of all cards currently not assigned to a hand.
      */
     private void checkRoyalFlush(ArrayList<Card> cards) {
-        // @TODO: Maybe use a switch statement or something? This algorithm doesn't look like it'd work.
-
         // Assign locals
         int i = 0;
         boolean moveindex;
@@ -184,6 +182,7 @@ public class HandFinder {
 
         // Check for a royal flush. If a card has a "following" number and a matching suit, add it.
         while(i < cards.size() && h.size() < 5) {
+            goodforroyalflush = false;
             moveindex = true;
             Card c = cards.get(i);
             if(c.isRoyal()) {
@@ -196,7 +195,7 @@ public class HandFinder {
                             goodforroyalflush = true;
                     }
 
-                    if(!goodforroyalflush) {
+                    if(goodforroyalflush) {
                         if(c.getSuit() == suittomatch) {
                             h.addCard(c);
                         }
@@ -280,22 +279,23 @@ public class HandFinder {
                 if(last.getSuit() != c.getSuit() && last.getNumber() == c.getNumber()) {
                     // This card matches suit, add this card
                     h.addCard(c);
-                } else if(last.getNumber() > c.getNumber()) {
+                } else if(last.getNumber() != c.getNumber()) {
                     // There is a gap in the cards. Reset the hand.
                     h.clear();
                     h.addCard(c);
                 }
             }
 
-            if(h.size() == 5) {
-                for(int k = 0; k < 5; k++) {
+            if(h.size() == 4) {
+                for(int k = 0; k < 4; k++) {
                     cards.remove(h.getHand(k));
                 }
                 totalhands.add(h);
 
-                // Look for more if there are enough cards to check
-                if(cards.size() >= 5)
+                // Look for more if there are enough cards to check, and break out of this loop to prevent incorrect state
+                if(cards.size() >= 4)
                     checkFourOfAKind(cards);
+                return;
             }
             i++;
         }
