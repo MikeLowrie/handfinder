@@ -24,6 +24,12 @@ public class Card implements Comparable<Card>{
         this.facevalue = "x";
     }
 
+    /**
+     * Main constructor which sets the Card's number, suit, and face value.
+     * @param number Numeric value of Card's value. Here, Ace = 14, King = 13, Queen = 12, Jack = 11.
+     * @param suit Suit for this Card.
+     * @param facevalue Actual value of Card's value. Here, Ace = A, King = K, Queen = Q, Jack = J.
+     */
     public Card(int number, char suit, String facevalue) {
         this.number = number;
         this.suit = suit;
@@ -102,31 +108,60 @@ public class Card implements Comparable<Card>{
         return value;
     }
 
+    /**
+     * Comparison method that allows Cards to be checked and ordered. Aces are high, and suits are alphabetical.
+     * @param other Other card to compare against this.
+     * @return Value representing which card is "higher" than other.
+     */
     @Override
     public int compareTo(Card other) {
-        return (other.number - this.number ) * 1000 + (other.suit - this.suit);
+        return (other.number - this.number) * 1000 + (other.suit - this.suit);
     }
 
+    /**
+     * Comparison method that checks if other Card is equal to this Card.
+     * @param other Other card to compare against this.
+     * @return True if the cards match suit and face value, false otherwise.
+     */
     public boolean equals(Card other) {
         return this.number == other.number && this.suit == other.suit;
     }
 
+    /**
+     * Returns the numberic representation of this Card's face value. Aces are high.
+     * @return Number for this Card's value
+     */
     public int getNumber() {
         return this.number;
     }
 
+    /**
+     * Returns the String representation of this Card's face value.
+     * @return String representing this Card's value
+     */
     public String getFacevalue() {
         return this.facevalue;
     }
 
+    /**
+     * Returns the suit this Card has.
+     * @return String showing this Card's suit
+     */
     public char getSuit() {
         return this.suit;
     }
 
+    /**
+     * Checks if this Card could be part of a royal flush, or if it's between an Ace or Ten.
+     * @return True if this card could be in a royal flush, false otherwise
+     */
     public boolean isRoyal() {
         return this.number > 9;
     }
 
+    /**
+     * Outputs the card's information to System out.
+     */
     public void print() {
         System.out.println("  " + this.facevalue + this.suit);
     }

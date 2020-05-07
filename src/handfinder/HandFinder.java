@@ -3,13 +3,6 @@ package handfinder;
 import java.util.ArrayList;
 import java.util.Collections;
 
-/* CURRENT TODO LIST:
- * - checkFullDeck: write method
- * - checkEevryCardFlush: test method
- * - checkRoyalFlush: rewrite algoritm possibly
- * - integrate ROYAL_FLUSH_IN_SPADES
- */
-
 public class HandFinder {
     private ArrayList<Card> masterlist;
     private ArrayList<Hand> totalhands;
@@ -29,7 +22,6 @@ public class HandFinder {
     private static final int ROYAL_FLUSH = 300;
     private static final int ROYAL_FLUSH_IN_SPADES = 400;
     private static final int EVERY_CARD_FLUSH = 1000;
-    private static final int FULL_DECK = 5000;
 
     /**
      * Main method.
@@ -94,8 +86,7 @@ public class HandFinder {
         ArrayList<Card> cards = this.cloneMasterList();
 
         // Order is set based on value of hand, except as noted below.
-        this.checkFullDeck(cards);
-        //this.checkEveryCardFlush(cards);
+        this.checkEveryCardFlush(cards);
         this.checkRoyalFlush(cards);
         this.checkStraightFlush(cards);
         this.checkFourOfAKind(cards);
@@ -112,23 +103,10 @@ public class HandFinder {
     }
 
     /**
-     * Checks the total list of cards for a complete deck of cards.
-     * @param cards Available cards to search
-     */
-    private void checkFullDeck(ArrayList<Card> cards) {
-        int i = 0;
-        Hand h = new Hand(new ArrayList<Card>(), "Full Deck", FULL_DECK);
-        while(i < cards.size() && h.size() < 52 && cards.size() > 52) {
-
-        }
-    }
-
-    /**
      * Checks the total list of cards for a complete set of one suit.
      * @param cards Available cards to search
      */
     public void checkEveryCardFlush(ArrayList<Card> cards) {
-        // TODO: Test this method
         int i = 0;
         int nextstart = 1;
         Hand h = new Hand(new ArrayList<Card>(), "Every Card Flush", EVERY_CARD_FLUSH);
@@ -142,23 +120,24 @@ public class HandFinder {
                 return;
             } else {
                 // If a hand is started, look further
-                Card first = h.getHand(0);
-                if(c.getSuit() == first.getSuit() && c.getNumber() - 1 == first.getNumber()) {
+                Card next = h.getCard(h.size() - 1);
+                if(c.getSuit() == next.getSuit() && c.getNumber() + 1 == next.getNumber()) {
                     // If the cards match suit, and is next in order, add to the hand
                     h.addCard(c);
-                } else if(c.getNumber() - 1 > first.getNumber()) {
+                } else if(c.getNumber() - 1 > next.getNumber()) {
                     // If the cards are too far apart, restart the hand from the next card from originally started.
                     h.clear();
                     i = nextstart;
                     nextstart++;
                 }
             }
+            i++;
         }
 
         // Add hand to total hands list
         if(h.size() == 13) {
             for(int k = 0; k < 13; k++) {
-                cards.remove(h.getHand(k));
+                cards.remove(h.getCard(k));
             }
             totalhands.add(h);
 
@@ -175,15 +154,13 @@ public class HandFinder {
     private void checkRoyalFlush(ArrayList<Card> cards) {
         // Assign locals
         int i = 0;
-        boolean moveindex;
-        boolean goodforroyalflush = false;
         char suittomatch = 'x';
         Hand h = new Hand(new ArrayList<Card>(), "Royal Flush", ROYAL_FLUSH);
 
         // Check for a royal flush. If a card has a "following" number and a matching suit, add it.
         while(i < cards.size() && h.size() < 5) {
-            goodforroyalflush = false;
-            moveindex = true;
+            boolean goodforroyalflush = false;
+            boolean moveindex = true;
             Card c = cards.get(i);
             if(c.isRoyal()) {
                 if(h.size() == 0) {
@@ -191,7 +168,7 @@ public class HandFinder {
                     suittomatch = c.getSuit();
                 } else {
                     for(int j = 0; j < h.size() && !goodforroyalflush; j++) {
-                        if((h.getHand(j)).getNumber() - 1 == c.getNumber())
+                        if((h.getCard(j)).getNumber() - 1 == c.getNumber())
                             goodforroyalflush = true;
                     }
 
@@ -211,9 +188,13 @@ public class HandFinder {
         // Add hand to total hands list
         if(h.size() == 5) {
             for(int k = 0; k < 5; k++) {
-                cards.remove(h.getHand(k));
+                cards.remove(h.getCard(k));
             }
             totalhands.add(h);
+
+            if(h.getCard(0).getSuit() == 's') {
+                h.reassignHand("Royal Flush in Spades", ROYAL_FLUSH_IN_SPADES);
+            }
 			
 			// Look for more if there are enough cards to check
             if(cards.size() >= 5)
@@ -235,7 +216,7 @@ public class HandFinder {
             if(h.size() == 0) {
                 h.addCard(c);
             } else {
-                last = h.getHand(h.size() - 1);
+                last = h.getCard(h.size() - 1);
                 if(last.getNumber() - 1 == c.getNumber() && last.getSuit() == c.getSuit()) {
                     // This card is next in sequence, add this card
                     h.addCard(c);
@@ -248,7 +229,7 @@ public class HandFinder {
 
             if(h.size() == 5) {
                 for(int k = 0; k < 5; k++) {
-                    cards.remove(h.getHand(k));
+                    cards.remove(h.getCard(k));
                 }
                 totalhands.add(h);
 
@@ -275,7 +256,7 @@ public class HandFinder {
             if(h.size() == 0) {
                 h.addCard(c);
             } else {
-                last = h.getHand(h.size() - 1);
+                last = h.getCard(h.size() - 1);
                 if(last.getSuit() != c.getSuit() && last.getNumber() == c.getNumber()) {
                     // This card matches suit, add this card
                     h.addCard(c);
@@ -288,7 +269,7 @@ public class HandFinder {
 
             if(h.size() == 4) {
                 for(int k = 0; k < 4; k++) {
-                    cards.remove(h.getHand(k));
+                    cards.remove(h.getCard(k));
                 }
                 totalhands.add(h);
 
@@ -393,7 +374,7 @@ public class HandFinder {
 
             if(h.size() == 5) {
                 for(int k = 0; k < 5; k++) {
-                    cards.remove(h.getHand(k));
+                    cards.remove(h.getCard(k));
                 }
                 totalhands.add(h);
 
@@ -421,7 +402,7 @@ public class HandFinder {
             if(h.size() == 0) {
                 h.addCard(c);
             } else {
-                last = h.getHand(h.size() - 1);
+                last = h.getCard(h.size() - 1);
                 if(last.getSuit() == c.getSuit() && last.getNumber() != c.getNumber()) {
                     // This card matches suit, add this card
                     h.addCard(c);
@@ -431,7 +412,7 @@ public class HandFinder {
 
             if(h.size() == 5) {
                 for(int k = 0; k < 5; k++) {
-                    cards.remove(h.getHand(k));
+                    cards.remove(h.getCard(k));
                 }
                 totalhands.add(h);
 
@@ -459,7 +440,7 @@ public class HandFinder {
 			if(h.size() == 0) {
 				h.addCard(c);
 			} else {
-				last = h.getHand(h.size() - 1);
+				last = h.getCard(h.size() - 1);
 				if(last.getNumber() - 1 == c.getNumber()) {
 					// This card is next in sequence, add this card
 					h.addCard(c);
@@ -475,7 +456,7 @@ public class HandFinder {
 		// Add hand to total hands list
         if(h.size() == 5) {
             for(int k = 0; k < 5; k++) {
-                cards.remove(h.getHand(k));
+                cards.remove(h.getCard(k));
             }
             totalhands.add(h);
 			
@@ -499,7 +480,7 @@ public class HandFinder {
 			if(h.size() == 0) {
 				h.addCard(current);
 			} else if(h.size() == 1) {
-				first = h.getHand(0);
+				first = h.getCard(0);
 				// If there is a mismatch in the number, start over with the new card.
 				if(current.getNumber() == first.getNumber()) {
 					if(current.getSuit() != first.getSuit()) {
@@ -512,8 +493,8 @@ public class HandFinder {
 					h.addCard(current);
 				}
 			} else if(h.size() == 2) {
-				first = h.getHand(0);
-				second = h.getHand(1);
+				first = h.getCard(0);
+				second = h.getCard(1);
 				// If there is a mismatch in the number, start over with the new card.
 				if(current.getNumber() == second.getNumber()) {
 					if(current.getSuit() != first.getSuit() && current.getSuit() != second.getSuit()) {
@@ -550,10 +531,10 @@ public class HandFinder {
                     first = totalhands.get(i);
                 } else {
                     Hand twopair = new Hand(new ArrayList<Card>(), "Two Pair", TWO_PAIR);
-                    twopair.addCard(first.getHand(0));
-                    twopair.addCard(first.getHand(1));
-                    twopair.addCard(second.getHand(0));
-                    twopair.addCard(second.getHand(1));
+                    twopair.addCard(first.getCard(0));
+                    twopair.addCard(first.getCard(1));
+                    twopair.addCard(second.getCard(0));
+                    twopair.addCard(second.getCard(1));
 
                     totalhands.add(twopair);
                     totalhands.remove(first);
