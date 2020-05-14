@@ -1,7 +1,9 @@
 package handfinder;
 
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.io.BufferedReader;
 
 public class HandFinder {
     private ArrayList<Card> masterlist;
@@ -28,11 +30,14 @@ public class HandFinder {
      * @param args Commandline arguments
      */
     public static void main(String[] args) {
-        System.out.println("Welcome to Deck Checker!");
-        if(args[0].equals("debug")) {
-           new UnitTestDriver();
-        } else {
-           new HandFinder(args, false, 0);
+        System.out.println("Welcome to Deck Checker! Please input your deck.");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            String input = reader.readLine();
+            String[] cards = input.split(" ");
+            new HandFinder(cards, false, 0);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -409,7 +414,6 @@ public class HandFinder {
                 }
                 // Don't remove all cards from this hand until every card is counted
             }
-
             if(h.size() == 5) {
                 for(int k = 0; k < 5; k++) {
                     cards.remove(h.getCard(k));
@@ -419,6 +423,7 @@ public class HandFinder {
                 // Look for more if there are enough cards to check
                 if(cards.size() >= 5)
                     checkFlush(cards);
+                return;
             }
             i++;
         }
