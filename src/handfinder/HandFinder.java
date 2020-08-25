@@ -172,10 +172,9 @@ public class HandFinder {
                     h.addCard(c);
                     suittomatch = c.getSuit();
                 } else {
-                    for(int j = 0; j < h.size() && !goodforroyalflush; j++) {
-                        if((h.getCard(j)).getNumber() - 1 == c.getNumber())
-                            goodforroyalflush = true;
-                    }
+                    Card lastcard = h.getCard(h.size() - 1);
+                    if(lastcard.getNumber() == c.getNumber() && lastcard.getSuit() == c.getSuit())
+                        goodforroyalflush = true;
 
                     if(goodforroyalflush) {
                         if(c.getSuit() == suittomatch) {
@@ -577,8 +576,8 @@ public class HandFinder {
                 cards.remove(previous);
                 i -= 2;
 
-                previous = new Card();
-                h = new Hand(new ArrayList<Card>(), "Pair", PAIR);
+                checkPair(cards);
+                return;
             }
         }
     }
@@ -614,9 +613,6 @@ public class HandFinder {
             boolean testpass = totalpoints == debugpoints;
             System.out.println(testpass + " | " + this.debugname + " expects " + this.debugpoints + ", counted " + totalpoints);
         } else {
-            for (Card c : masterlist)
-                System.out.println(c.getFacevalue() + c.getSuit());
-
             System.out.println("Total points: " + totalpoints);
         }
     }
